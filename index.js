@@ -120,17 +120,33 @@ let addEmployee = function (answers) {
     })
 }
 
-let updateRole = function (answers) {
-    const sql = 'UPDATE employee SET role_id = ? WHERE id = ?';
-    const params = [answers.roleID, answers.employeeID]
-
-    db.query(sql, params, (err, results) => {
-        if(err) {
-            res.status(400).json({ error: err.message });
-            return;
-        }
-        viewAllEmployees();
+let updateRole = function () {
+    db.query('SELECT first_name, last_name FROM employees.employee', 
+    function (err, results) {
+        
+        console.log(results);
+        // inquirer.prompt
+        // ([
+        //     {
+        //         type: 'list',
+        //         name: 'role',
+        //         message: 'Pick an Employee to Update Role',
+        //         choices: [
+        //             employees
+        //         ]
+        //     }
+        // ])
     })
+    // const sql = 'UPDATE employee SET role_id = ? WHERE id = ?';
+    // const params = [answers.roleID, answers.employeeID]
+
+    // db.query(sql, params, (err, results) => {
+    //     if(err) {
+    //         res.status(400).json({ error: err.message });
+    //         return;
+    //     }
+    //     viewAllEmployees();
+    // })
 }
 
 let viewRoles = function () {
@@ -195,10 +211,10 @@ let init = function () {
                 })
             }
             if(answers.action === 'Update employee Role') {
-                inquirer.prompt(employees).then((answers) => {
+                // inquirer.prompt(employees).then((answers) => {
                     // console.log(answers.ID);
-                    updateRole(answers);
-                })
+                    updateRole();
+               // })
             }
             if(answers.action === 'View all roles') {
                 viewRoles()
