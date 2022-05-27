@@ -76,6 +76,25 @@ router.post('/roles', ({ body }, res) => {
 })
 
 
+router.put('/roles/:id', ({ body }, res) => {
+    const sql = `UPDATE roles SET title = ?, salary = ?, department_id = ? WHERE id = ?`;
+    const params = [body.title, body.salary, body.department_id];
+
+    db.query(sql, params, (err, result) => {
+        if (err) {
+            res.status(400).json({ error: err.message });
+            return;
+        }
+            res.json({
+              message: 'success',
+              data: req.body,
+              changes: result.affectedRows
+            });
+          })
+    })
+
+
+
 //    EMPLOYEES ROUTES
 
 router.get('/employees', (req, res) => {

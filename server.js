@@ -6,8 +6,10 @@ const PORT = process.env.PORT || 3001;
 const app = express();
 const cTable = require('console.table');
 const inquirer = require('inquirer');
-// const http = require('node:http');
-const axios = require('axios');
+
+
+
+
 
 
 // Express middleware
@@ -59,12 +61,19 @@ const questions = [
 let init = function () {
     inquirer.prompt(questions)
         .then((answers) => {
-            if (answers.action === 'View all employees') {
-                axios.get('http://localhost:3001/api/employees')
-                    .then(res => {
-                        console.log(res.data);
-                        
-                    })
+            if (answers.action === 'View all departments') {
+                db.query('SELECT * FROM department', (err, rows) => {
+                    console.table(rows)
+                }
+                )
+            } if(answers.action === 'View all roles') {
+                db.query('SELECT * FROM roles', (err, rows) => {
+                    console.table(rows)
+                })
+            }  if(answers.action === 'View all employees') {
+                db.query('SELECT * FROM employee', (err, rows) => {
+                    console.table(rows)
+                })
             }
         })
 }
@@ -76,34 +85,3 @@ init();
 
 
 
-
-
-// let employees = axios.get('http://localhost:3001/api/employees')
-// .then(res => {
-//     console.log(res.status);
-// })
-
-
-let mockData = [
-    {
-        "id": 1,
-        "first_name": "Jane",
-        "last_name": "Doe",
-        "role_id": 1,
-        "manager_id": null
-    },
-    {
-        "id": 2,
-        "first_name": "Mike",
-        "last_name": "Chan",
-        "role_id": 2,
-        "manager_id": 1
-    },
-    {
-        "id": 3,
-        "first_name": "Ashley",
-        "last_name": "Rodriguez",
-        "role_id": 3,
-        "manager_id": null
-    }
-]
