@@ -98,17 +98,114 @@ const newDept = [
 
 
 let viewAllEmployees = function () {
-    db.query('SELECT employee.id, employee.first_name, employee.last_name, roles.title, roles.salary, department.name AS department, CONCAT(manager.first_name, " ", manager.last_name) AS manager FROM employee LEFT JOIN roles ON employee.role_id = roles.id LEFT JOIN employee manager ON manager.id = employee.manager_id LEFT JOIN department ON roles.department_id = department.id',
+    db.query(
+        'SELECT employee.id, employee.first_name, employee.last_name, roles.title, roles.salary, department.name AS department, CONCAT(manager.first_name, " ", manager.last_name) AS manager FROM employee LEFT JOIN roles ON employee.role_id = roles.id LEFT JOIN employee manager ON manager.id = employee.manager_id LEFT JOIN department ON roles.department_id = department.id',
         function (err, results) {
             console.table(results);
             init();
         })
 }
 
+// let addEmployee = function (answers) {
+//     const sql = 'INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?,?,?,?)';
+//     const params = [answers.first_name, answers.last_name, answers.role_id, answers.manager_id];
+
+//     db.query(sql, params, (err, results) => {
+//         if (err) {
+//             res.status(400).json({ error: err.message });
+//             return;
+//         }
+       
+//         viewAllEmployees();
+//     })
+// }
+
+//create function to grab role values from database and use map method to add to an array. this array is saved to a variable, 'role'
+let addEmployeePrompt = function() {
+    
+    let sql = 
+    `SELECT  
+    roles.id,
+    roles.title, 
+    roles.salary,
+    CONCAT(manager.first_name, " ", manager.last_name) 
+    AS manager 
+    FROM employee 
+    LEFT JOIN roles ON employee.role_id = roles.id 
+    LEFT JOIN employee manager ON manager.id = employee.manager_id
+    `
+    db.query(sql, (err, results)=>{
+        if(err)throw err;
+        const role = results.map(({ id, title, salary}) => ({
+            id: id,
+            title: title,
+            salary: salary
+        }));
+        const managerName = results.map(({ manager_id, manager }) => ({
+            id: manager_id,
+            managers: manager
+        }))
+        console.table(role);
+        console.table(managerName);
+
+        addEmployeeArray(role, managerName);
+    });
+}
+
+//ROLES ARE NOW RESULTING AS UNDEFINED IN INQUIRER PROMPT
+
+    // let sql2 = 
+    // `SELECT CONCAT(manager.first_name, " ", manager.last_name) 
+    // AS manager 
+    // FROM employee
+    // LEFT JOIN employee manager 
+    // ON manager.id = employee.manager_id
+    // `
+    // db.query(sql2, (err, results) => {
+    //     if(err)throw err;
+    //     const managerNames = results.map(({ manager }) => ({
+    //         manager: manager
+    //     }));
+
+    // })
+
+    
+
+
+
+//add array 'role' to the list of choices in our prompt
+let addEmployeeArray = function(x, y) {
+    inquirer.prompt([
+        {
+            type: 'input',
+            name: 'first_name',
+            message: 'What is their first name?'
+        },
+        {
+            type: 'input',
+            name: 'last_name',
+            message: 'What is their last name?'
+        },
+        {
+            type: 'list',
+            name: 'role_id',
+            message: 'What is their role?',
+            choices: x
+        },
+        {
+            type: 'input',
+            name: 'manager_id',
+            message: 'What is the manager ID?'
+        }
+    ]).then((answers) => {
+        addEmployee(answers)
+    })
+}
+
+//take answers from prompt and insert into database
 let addEmployee = function (answers) {
     const sql = 'INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?,?,?,?)';
     const params = [answers.first_name, answers.last_name, answers.role_id, answers.manager_id];
-
     db.query(sql, params, (err, results) => {
         if (err) {
             res.status(400).json({ error: err.message });
@@ -119,35 +216,17 @@ let addEmployee = function (answers) {
     })
 }
 
-let updateRole = function () {
-    db.query('SELECT first_name, last_name FROM employees.employee', 
-    function (err, results) {
-        console.log(results);
+let updateRole = function (answers) {
+    const sql = 'UPDATE employee SET role_id = ? WHERE id = ?';
+    const params = [answers.roleID, answers.employeeID]
 
-       
-
-        // inquirer.prompt
-        // ([
-        //     {
-        //         type: 'list',
-        //         name: 'role',
-        //         message: 'Pick an Employee to Update Role',
-        //         choices: [
-        //             employees
-        //         ]
-        //     }
-        // ])
+    db.query(sql, params, (err, results) => {
+        if(err) {
+            res.status(400).json({ error: err.message });
+            return;
+        }
+        viewAllEmployees();
     })
-    // const sql = 'UPDATE employee SET role_id = ? WHERE id = ?';
-    // const params = [answers.roleID, answers.employeeID]
-
-    // db.query(sql, params, (err, results) => {
-    //     if(err) {
-    //         res.status(400).json({ error: err.message });
-    //         return;
-    //     }
-    //     viewAllEmployees();
-    // })
 }
 
 let viewRoles = function () {
@@ -206,16 +285,18 @@ let init = function () {
                 viewAllEmployees();
             }
             if (answers.action === 'Add employee') {
-                inquirer.prompt(employeeInfo).then((answers) => {
-                    // console.log(answers)
-                    addEmployee(answers);
-                })
+                // inquirer.prompt(employeeInfo).then((answers) => {
+                //     console.log(answers)
+                //      addEmployee(answers);
+                // })
+
+                addEmployeePrompt();
             }
             if(answers.action === 'Update employee Role') {
-                // inquirer.prompt(employees).then((answers) => {
+                inquirer.prompt(employees).then((answers) => {
                     // console.log(answers.ID);
-                    updateRole();
-               // })
+                    updateRole(answers);
+                })
             }
             if(answers.action === 'View all roles') {
                 viewRoles()
