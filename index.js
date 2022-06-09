@@ -120,14 +120,14 @@ let viewAllEmployees = function () {
 //     })
 // }
 
-//create function to grab role values from database and use map method to add to an array. this array is saved to a variable, 'role'
+//create function to grab role values from database and use map method to add to an array. this array is saved to a variable, 'role' and 'managerName'
 let addEmployeePrompt = function() {
-    
     let sql = 
     `SELECT  
     roles.id,
     roles.title, 
     roles.salary,
+    employee.manager_id,
     CONCAT(manager.first_name, " ", manager.last_name) 
     AS manager 
     FROM employee 
@@ -137,44 +137,25 @@ let addEmployeePrompt = function() {
     db.query(sql, (err, results)=>{
         if(err)throw err;
         const role = results.map(({ id, title, salary}) => ({
-            id: id,
+            name: id,
             title: title,
             salary: salary
         }));
         const managerName = results.map(({ manager_id, manager }) => ({
-            id: manager_id,
-            managers: manager
-        }))
+            name: manager_id,
+            firstLastName: manager
+        }));
+
         console.table(role);
         console.table(managerName);
-
         addEmployeeArray(role, managerName);
     });
 }
 
-//ROLES ARE NOW RESULTING AS UNDEFINED IN INQUIRER PROMPT
-
-    // let sql2 = 
-    // `SELECT CONCAT(manager.first_name, " ", manager.last_name) 
-    // AS manager 
-    // FROM employee
-    // LEFT JOIN employee manager 
-    // ON manager.id = employee.manager_id
-    // `
-    // db.query(sql2, (err, results) => {
-    //     if(err)throw err;
-    //     const managerNames = results.map(({ manager }) => ({
-    //         manager: manager
-    //     }));
-
-    // })
-
-    
-
-
-
 //add array 'role' to the list of choices in our prompt
 let addEmployeeArray = function(x, y) {
+    console.log(x);
+    console.log(y);
     inquirer.prompt([
         {
             type: 'input',
@@ -189,13 +170,14 @@ let addEmployeeArray = function(x, y) {
         {
             type: 'list',
             name: 'role_id',
-            message: 'What is their role?',
+            message: 'What is their role ID?',
             choices: x
         },
         {
-            type: 'input',
+            type: 'list',
             name: 'manager_id',
-            message: 'What is the manager ID?'
+            message: 'What is the manager ID?',
+            choices: y
         }
     ]).then((answers) => {
         addEmployee(answers)
