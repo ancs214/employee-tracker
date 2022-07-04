@@ -49,7 +49,7 @@ const employeeInfo = [
     }
 ]
 
-//TO UPDATE AN EMPLOYEE ROLE
+// UPDATE ROLE
 const employees = [
     {
         type: 'input',
@@ -63,7 +63,7 @@ const employees = [
     }
 ]
 
-//TO CREATE NEW ROLE
+// CREATE NEW ROLE
 const newRole = [
     {
         type: 'input',
@@ -82,7 +82,7 @@ const newRole = [
     }
 ]
 
-//CREATE NEW DEPT
+// CREATE NEW DEPT
 const newDept = [
     {
         type: 'input',
@@ -93,10 +93,7 @@ const newDept = [
 
 
 
-
-//  ===============FUNCTIONS=======================
-
-
+//VIEW ALL EMPLOYEES
 let viewAllEmployees = function () {
     db.query(
         'SELECT employee.id, employee.first_name, employee.last_name, roles.title, roles.salary, department.name AS department, CONCAT(manager.first_name, " ", manager.last_name) AS manager FROM employee LEFT JOIN roles ON employee.role_id = roles.id LEFT JOIN employee manager ON manager.id = employee.manager_id LEFT JOIN department ON roles.department_id = department.id',
@@ -106,19 +103,7 @@ let viewAllEmployees = function () {
         })
 }
 
-// let addEmployee = function (answers) {
-//     const sql = 'INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?,?,?,?)';
-//     const params = [answers.first_name, answers.last_name, answers.role_id, answers.manager_id];
-
-//     db.query(sql, params, (err, results) => {
-//         if (err) {
-//             res.status(400).json({ error: err.message });
-//             return;
-//         }
-       
-//         viewAllEmployees();
-//     })
-// }
+//---------------------ADD EMPLOYEE FUNCTIONS-----------------------
 
 //create function to grab role values from database and use map method to add to an array. this array is saved to a variable, 'role' and 'managerName'
 let addEmployeePrompt = function() {
@@ -197,6 +182,19 @@ let addEmployee = function (answers) {
         viewAllEmployees();
     })
 }
+//-------------------------END ADD EMPLOYEE FUNCTIONS -------------------------------
+
+
+//--------------------------UPDATE EMPLOYEE ROLE-----------------------------------
+
+let getRoles = function () {
+    let sql = 
+    `SELECT * FROM roles`
+    db.query(sql, (err, results) => {
+        if(err)throw err;
+        console.table(results);
+    })
+}
 
 let updateRole = function (answers) {
     const sql = 'UPDATE employee SET role_id = ? WHERE id = ?';
@@ -211,14 +209,16 @@ let updateRole = function (answers) {
     })
 }
 
+//VIEW ALL ROLES
 let viewRoles = function () {
-    db.query('SELECT department.name, roles.title, roles.salary FROM roles LEFT JOIN department ON roles.department_id = department.id',
+    db.query('SELECT department.name, roles.title, roles.salary, department.name AS department FROM roles LEFT JOIN department ON roles.department_id = department.id',
         function (err, results) {
             console.table(results);
             init();
         })
 }
 
+//ADD NEW ROLE
 let addRole = function (answers) {
     const sql = 'INSERT INTO roles (title, salary, department_id) VALUES (?,?,?)';
     const params = [answers.title, answers.salary, answers.dept];
@@ -232,7 +232,7 @@ let addRole = function (answers) {
     })
 }
 
-
+//VIEW ALL DEPARTMENTS
 let viewDepts = function () {
     db.query('SELECT * FROM department',
         function (err, results) {
@@ -241,6 +241,7 @@ let viewDepts = function () {
         })
 }
 
+//ADD NEW DEPARTMENT
 let newDepartment = function(answers) {
     const sql = 'INSERT INTO department (name) VALUES (?)';
     const params = [answers.name];
@@ -277,7 +278,8 @@ let init = function () {
             if(answers.action === 'Update employee Role') {
                 inquirer.prompt(employees).then((answers) => {
                     // console.log(answers.ID);
-                    updateRole(answers);
+                    // updateRole(answers);
+                    getRoles();
                 })
             }
             if(answers.action === 'View all roles') {
