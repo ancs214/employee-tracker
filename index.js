@@ -121,13 +121,13 @@ let addEmployeePrompt = function() {
     `
     db.query(sql, (err, results)=>{
         if(err)throw err;
-        const role = results.map(({ id, title, salary}) => ({
-            name: id,
+        const role = results.map(({ title, salary}) => ({
+
             title: title,
             salary: salary
         }));
-        const managerName = results.map(({ manager_id, manager }) => ({
-            name: manager_id,
+        const managerName = results.map(({  manager }) => ({
+        
             firstLastName: manager
         }));
 
@@ -140,7 +140,7 @@ let addEmployeePrompt = function() {
 //add array 'role' to the list of choices in our prompt
 let addEmployeeArray = function(x, y) {
     console.log(x);
-    console.log(y);
+    // console.log(y);
     inquirer.prompt([
         {
             type: 'input',
